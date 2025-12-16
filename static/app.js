@@ -13,33 +13,49 @@ const homePenaltiesEl = el('homePenalties');
 const awayPenaltiesEl = el('awayPenalties');
 
 function renderTimeouts(container, count) {
-  const n = parseInt(count ?? 0, 10);
-  if (!Number.isFinite(n) || n <= 0) {
-    container.classList.add('hidden');
-    container.innerHTML = '';
-    return;
-  }
+  // Always make container participate in layout
   container.classList.remove('hidden');
-  container.innerHTML = Array.from({ length: n }, () => `<span class="timeoutIcon">⏱</span>`).join('');
+
+  const n = parseInt(count ?? 0, 10);
+  if (container.children.length !== 1) {
+    container.innerHTML = '';
+    const span = document.createElement('span');
+    span.className = 'timeoutIcon';
+    span.textContent = '⏱';
+    container.appendChild(span);
+  }
+
+  const child = container.firstElementChild;
+  const show = Number.isFinite(n) && n >= 1;
+  child.classList.toggle('inactive', !show);
 }
 
 function renderPenalties(container, active, clocks) {
+  // Always make container participate in layout
+  container.classList.remove('hidden');
+
   const act = Array.isArray(active) ? active : [];
   const cls = Array.isArray(clocks) ? clocks : [];
+  const slots = 3;
 
-  const lines = act.map((n) => {
-    const clk = cls[n - 1] ?? null; // n is 1..3
-    return `${clk ?? '--:--'}`;
-  });
-
-  if (lines.length === 0) {
-    container.classList.add('hidden');
+  // Ensure fixed number of rows
+  if (container.children.length !== slots) {
     container.innerHTML = '';
-    return;
+    for (let i = 0; i < slots; i += 1) {
+      const div = document.createElement('div');
+      div.className = 'penaltyLine';
+      div.textContent = '--:--';
+      container.appendChild(div);
+    }
   }
 
-  container.classList.remove('hidden');
-  container.innerHTML = lines.map(t => `<div class="penaltyLine">${t}</div>`).join('');
+  [...container.children].forEach((child, idx) => {
+    const slotNum = idx + 1;
+    const isActive = act.includes(slotNum);
+    const val = cls[slotNum - 1] ?? '--:--';
+    child.textContent = val;
+    child.classList.toggle('inactive', !isActive);
+  });
 }
 
 async function tick() {

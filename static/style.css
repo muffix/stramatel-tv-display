@@ -1,7 +1,15 @@
+:root {
+    --bg: #000;
+    --fg: #fff;
+    --accent-on: #2ecc71;
+    --accent-off: #e74c3c;
+    --timeout: #ffd400;
+}
+
 body {
     margin: 0;
-    background: #000;
-    color: #fff;
+    background: var(--bg);
+    color: var(--fg);
     font-family: system-ui, Segoe UI, Arial;
 }
 
@@ -54,16 +62,8 @@ body {
     box-shadow: 0 0 0.25em rgba(255, 255, 255, 0.25);
 }
 
-.dot.on {
-    background: #2ecc71;
-}
-
-/* green */
-.dot.off {
-    background: #e74c3c;
-}
-
-/* red */
+.dot.on { background: var(--accent-on); }
+.dot.off { background: var(--accent-off); }
 
 .clockRow {
     display: inline-flex;
@@ -76,10 +76,6 @@ body {
     text-align: left;
 }
 
-.teamMeta {
-    margin-bottom: 0.6vh;
-}
-
 .team.away {
     text-align: right;
 }
@@ -87,34 +83,49 @@ body {
 .penalties {
     font-size: 2.8vw;
     margin-top: 0.6vh;
+    min-height: 5.2em; /* reserve space for three lines */
+    min-width: 7ch;    /* prevent width jitter */
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
 }
 
 .penaltyLine {
     display: block;
-}
-
-.timeoutIcon {
-    color: #ffd400; /* yellow */
-    font-size: 2.6vw; /* keep or tweak */
-}
-
-.hidden {
-    display: none;
+    min-height: 1.4em;
 }
 
 .timeouts {
     margin-bottom: 0.6vh;
     opacity: 0.9;
     white-space: nowrap;
+    min-height: 1.6em; /* reserve space even when hidden */
+    min-width: 2.6em;  /* consistent width for single icon */
+    display: inline-flex;
+    gap: 0.4vw;
+    align-items: center;
 }
 
 .timeoutIcon {
     display: inline-block;
-    font-size: 2.6vw; /* tweak */
+    font-size: 2.6vw;
     margin-right: 0.6vw;
+    color: var(--timeout);
 }
 
 .team.away .timeoutIcon {
     margin-right: 0;
-    margin-left: 0.6vw;
+    margin-left: 0;
+}
+
+.team.away .timeouts {
+    justify-content: flex-end;
+}
+
+.hidden {
+    visibility: hidden; /* hide without collapsing layout */
+}
+
+.inactive {
+    opacity: 0.25;
 }
