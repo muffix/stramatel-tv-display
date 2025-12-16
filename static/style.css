@@ -1,0 +1,120 @@
+body {
+    margin: 0;
+    background: #000;
+    color: #fff;
+    font-family: system-ui, Segoe UI, Arial;
+}
+
+.wrap {
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.card {
+    text-align: center;
+}
+
+.clock {
+    font-size: 14vw;
+    line-height: 1;
+    font-weight: 700;
+}
+
+.score {
+    font-size: 10vw;
+    margin-top: 2vh;
+    font-weight: 700;
+}
+
+.meta {
+    font-size: 3vw;
+    opacity: 0.8;
+    margin-top: 2vh;
+}
+
+.small {
+    font-size: 2.2vw;
+    opacity: 0.75;
+    margin-top: 1vh;
+}
+
+.row {
+    display: flex;
+    justify-content: center;
+    gap: 6vw;
+}
+
+.dot {
+    display: inline-block;
+    width: 4em;
+    height: 4em;
+    border-radius: 999px;
+    box-shadow: 0 0 0.25em rgba(255, 255, 255, 0.25);
+}
+
+.dot.on {
+    background: #2ecc71;
+}
+
+/* green */
+.dot.off {
+    background: #e74c3c;
+}
+
+/* red */
+
+.clockRow {
+    display: inline-flex;
+    align-items: center;
+    gap: 2vw;
+}
+
+.team {
+    min-width: 28vw;
+    text-align: left;
+}
+
+.teamMeta {
+    margin-bottom: 0.6vh;
+}
+
+.team.away {
+    text-align: right;
+}
+
+.penalties {
+    font-size: 2.8vw;
+    margin-top: 0.6vh;
+}
+
+.penaltyLine {
+    display: block;
+}
+
+.timeoutIcon {
+    color: #ffd400; /* yellow */
+    font-size: 2.6vw; /* keep or tweak */
+}
+
+.hidden {
+    display: none;
+}
+
+.timeouts {
+    margin-bottom: 0.6vh;
+    opacity: 0.9;
+    white-space: nowrap;
+}
+
+.timeoutIcon {
+    display: inline-block;
+    font-size: 2.6vw; /* tweak */
+    margin-right: 0.6vw;
+}
+
+.team.away .timeoutIcon {
+    margin-right: 0;
+    margin-left: 0.6vw;
+}
