@@ -51,6 +51,7 @@ class Handler(BaseHTTPRequestHandler):
     """Minimal HTTP handler serving current state and static assets."""
 
     server_version = "StramatelHTTP/1.0"
+    sys_version = ""
 
     def do_GET(self) -> None:  # noqa: N802  (BaseHTTPRequestHandler API)
         if self.path == "/" or self.path.startswith("/index"):
@@ -59,6 +60,10 @@ class Handler(BaseHTTPRequestHandler):
 
         if self.path == "/state":
             self._send_json()
+            return
+
+        if self.path == "/vmix.json":
+            self._send_vmix()
             return
 
         if self.path.startswith("/static/"):
@@ -78,6 +83,50 @@ class Handler(BaseHTTPRequestHandler):
     def _send_json(self) -> None:
         with state_lock:
             payload = json.dumps(latest_state).encode("utf-8")
+        self.send_response(200)
+        self.send_header("Content-Type", "application/json")
+        self.send_header("Cache-Control", "no-store")
+        self.end_headers()
+        self.wfile.write(payload)
+
+    def _send_vmix(self) -> None:
+        """Expose state in vMix-friendly JSON array-of-objects format."""
+        with state_lock:
+            s = latest_state.copy()
+        if not s.get("ok"):
+            rows = []
+        else:
+            home = s.get("home", {}) or {}
+            away = s.get("away", {}) or {}
+
+            def _fmt_penalties(clocks: list[Optional[str]] | None) -> str:
+                if not clocks:
+                    return ""
+                return " | ".join([c for c in clocks if c])
+
+            rows = [
+                {
+                    "Clock": s.get("clock") or "--:--",
+                    "Period": s.get("period"),
+                    "HomeScore": home.get("score"),
+                    "AwayScore": away.get("score"),
+                    "Running": bool(s.get("running")),
+                    "Horn": bool(s.get("horn")),
+                    "HomeTimeout": home.get("timeouts"),
+                    "AwayTimeout": away.get("timeouts"),
+                    "HomePenalties": _fmt_penalties(home.get("penalty_clocks")),
+                    "AwayPenalties": _fmt_penalties(away.get("penalty_clocks")),
+                    "HomePensActive": ",".join(
+                        map(str, home.get("penalties_active", []))
+                    ),
+                    "AwayPensActive": ",".join(
+                        map(str, away.get("penalties_active", []))
+                    ),
+                    "LastUpdated": s.get("ts"),
+                }
+            ]
+
+        payload = json.dumps(rows).encode("utf-8")
         self.send_response(200)
         self.send_header("Content-Type", "application/json")
         self.send_header("Cache-Control", "no-store")
