@@ -30,24 +30,30 @@ def digit(b: int) -> Optional[str]:
     return chr(b) if 0x30 <= b <= 0x39 else None
 
 
-def parse_clock4(d1: int, d2: int, d3: int, d4: int) -> Optional[str]:
+def parse_clock(d1: int, d2: int, d3: int, d4: int) -> Optional[str]:
     """Parse 4-byte clock field into a human-readable string."""
     if d4 == 0x20:  # < 1 minute encoding: "SSt "
         a, b, t = map(parse_1digit, (d1, d2, d3))
-        if None in (a, b, t):
+        if None in (b, t):
             return None
+        if a is None:
+            a = ""
         return f"{a}{b}.{t}"  # e.g. "42.0"
 
     a, b, c, d = map(parse_1digit, (d1, d2, d3, d4))
-    if None in (a, b, c, d):
+    if None in (b, c, d):
         return None
+    if a is None:
+        a = ""
     return f"{a}{b}:{c}{d}"  # e.g. "06:04"
 
 
 def parse_2digits(a: int, b: int) -> Optional[int]:
     a, b = digit(a), digit(b)
-    if a is None or b is None:
+    if a is None and b is None:
         return None
+    if a is None:
+        return int(b)
     return int(a + b)
 
 
@@ -56,7 +62,7 @@ def parse_1digit(a: int) -> Optional[int]:
     return int(a) if a is not None else None
 
 
-def parse_penalty3(a: int, b: int, c: int) -> Optional[str]:
+def parse_penalty(a: int, b: int, c: int) -> Optional[str]:
     a, b, c = map(digit, (a, b, c))
     if None in (a, b, c):
         return None
@@ -94,7 +100,7 @@ class FrameStream:
 
 def parse_hockey(frame: bytes) -> Dict[str, Any]:
     """Parse a single 54-byte hockey frame into a state dictionary."""
-    clock = parse_clock4(frame[4], frame[5], frame[6], frame[7])  # bytes 5..8
+    clock = parse_clock(frame[4], frame[5], frame[6], frame[7])  # bytes 5..8
     home_score = parse_2digits(frame[9], frame[10])  # 10..11
     away_score = parse_2digits(frame[12], frame[13])  # 13..14
     period = parse_1digit(frame[14])  # 15
@@ -108,13 +114,13 @@ def parse_hockey(frame: bytes) -> Dict[str, Any]:
     running = frame[20] == 0x31  # 21
 
     # Home penalties: 23..31 (3 digits each)
-    hp1 = parse_penalty3(frame[22], frame[23], frame[24])
-    hp2 = parse_penalty3(frame[25], frame[26], frame[27])
-    hp3 = parse_penalty3(frame[28], frame[29], frame[30])
+    hp1 = parse_penalty(frame[22], frame[23], frame[24])
+    hp2 = parse_penalty(frame[25], frame[26], frame[27])
+    hp3 = parse_penalty(frame[28], frame[29], frame[30])
     # Away penalties: 36..44
-    ap1 = parse_penalty3(frame[35], frame[36], frame[37])
-    ap2 = parse_penalty3(frame[38], frame[39], frame[40])
-    ap3 = parse_penalty3(frame[41], frame[42], frame[43])
+    ap1 = parse_penalty(frame[35], frame[36], frame[37])
+    ap2 = parse_penalty(frame[38], frame[39], frame[40])
+    ap3 = parse_penalty(frame[41], frame[42], frame[43])
 
     return {
         "ok": True,
@@ -137,19 +143,3 @@ def parse_hockey(frame: bytes) -> Dict[str, Any]:
             "penalty_clocks": [ap1, ap2, ap3],
         },
     }
-
-
-__all__ = [
-    "START",
-    "END",
-    "FRAME_LEN",
-    "SPORT_HOCKEY",
-    "FrameStream",
-    "penalties_active",
-    "parse_clock4",
-    "parse_hockey",
-    "parse_1digit",
-    "parse_2digits",
-    "parse_penalty3",
-    "digit",
-]

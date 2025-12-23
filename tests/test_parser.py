@@ -7,9 +7,12 @@ from parser import (
     SPORT_HOCKEY,
     START,
     FrameStream,
-    parse_clock4,
+    parse_clock,
     parse_hockey,
     penalties_active,
+    parse_penalty,
+    parse_1digit,
+    parse_2digits,
 )
 
 
@@ -72,9 +75,26 @@ def make_hockey_frame(
     return bytes(buf)
 
 
+def test_parse_digit():
+    assert parse_1digit(ord("1")) == 1
+    assert parse_1digit(ord("a")) is None
+
+
+def test_parse_2digits():
+    assert parse_2digits(ord("4"), ord("2")) == 42
+    assert parse_2digits(ord("0"), ord("2")) == 2
+    assert parse_2digits(ord(" "), ord("2")) == 2
+
+
 def test_parse_clock_modes():
-    assert parse_clock4(*_digits("420 ")) == "42.0"  # sub-minute with tenths
-    assert parse_clock4(*_digits("0604")) == "06:04"
+    assert parse_clock(*_digits("420 ")) == "42.0"  # sub-minute with tenths
+    assert parse_clock(*_digits(" 604")) == "6:04"
+    assert parse_clock(*_digits("0604")) == "06:04"
+
+
+def test_parse_penalties():
+    assert parse_penalty(*_digits("123")) == "1:23"
+    assert parse_penalty(*_digits("023")) == "0:23"
 
 
 def test_penalties_active_map():
