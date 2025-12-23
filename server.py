@@ -20,7 +20,7 @@ from parser import (
 )
 
 STATIC_DIR = pathlib.Path(__file__).with_name("static")
-DATA_DIR = pathlib.Path(__file__).parent / "tests" / "data"
+DATA_DIR = pathlib.Path(__file__).parent.joinpath("tests", "data")
 
 
 class TeamState(TypedDict, total=False):
