@@ -52,6 +52,39 @@ Add in vMix:
 3. Pick a suitable refresh rate, e.g. 100ms-500ms
 4. In Title Editor, map fields to the column names above (or use column order).
 
+## RS-485 wiring (to USB-RS485)
+
+Stramatel’s TV interface cable (per *STRAMATEL codes.pdf*) breaks out 4 wires:
+
+- Black (Pin 1) = GND
+- White (Pin 2) = Tx+ (RS-485 non-inverting)
+- Yellow (Pin 4) = Tx− (RS-485 inverting)
+- Red = not connected
+- Blue = not connected
+
+To make an adapter to a USB-RS485 dongle:
+1. Strip the outer jacket and individual wires.
+2. Crimp/solder **White → A/+**, **Yellow → B/-**, **Black → GND** on the USB-RS485 side. Leave others floating.
+3. Plug the RS-485 converter into your computer. If you see garbage data, swap A/B — some dongles label them oppositely.
+4. Run the app pointing at that COM port (`--com <device>`).
+
+### Making a new cable
+
+The Stramatel cable uses a standard 5-pin DIN connector (180 degrees).
+Pins on male connectors are numbered (from right to left, viewed from outside of the connector, with the five pins upwards, and facing them): 1–4–2–5–3
+
+Only pins 1, 2, and 4 need to be connected. 
+
+Wiring sketch:
+
+```
+Connector                        USB-RS485 dongle
+-------------------------------------------------
+Pin 1, GND  ------------------>  GND
+Pin 2, Tx+  ------------------>  A / D+ / RS485+
+Pin 4, Tx-  ------------------>  B / D- / RS485-
+```
+
 ## Testing
 
 ```bash
