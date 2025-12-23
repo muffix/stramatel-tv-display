@@ -1,6 +1,6 @@
 # Stramatel Hockey Scoreboard Renderer
 
-Small Python app that reads Stramatel hockey/floorball serial data, parses the 54‑byte frames, and serves a minimal web UI showing clock, scores, period, penalties, and timeouts. It can also replay bundled test data for demoing without hardware.
+Small Python app that reads Stramatel hockey/floorball serial data, parses the 54‑byte frames, and serves a minimal web UI showing clock, scores, period, penalties, and timeouts. It also exposes a vMix-friendly JSON endpoint so you can feed graphics directly into vMix (see the vMix section below). A bundled test stream lets you demo without hardware.
 
 ## Requirements
 
@@ -39,6 +39,18 @@ uv run python main.py --fake-data
 ```
 
 This replays `tests/data/stramatel_hockey_testdata_v3_raw_with_chatter.bin` on a loop.
+
+## vMix Data Source
+
+The server exposes `http://<host>:8000/vmix.json`, returning a single-row JSON array with keys:
+
+`Clock, Period, HomeScore, AwayScore, Running, Horn, HomeTimeout, AwayTimeout, HomePenalties, AwayPenalties, HomePensActive, AwayPensActive, LastUpdated`
+
+Add in vMix:
+1. Data Sources Manager → Add → JSON  
+2. URL: `http://<host>:8000/vmix.json`  
+3. Pick a suitable refresh rate, e.g. 100ms-500ms
+4. In Title Editor, map fields to the column names above (or use column order).
 
 ## Testing
 
