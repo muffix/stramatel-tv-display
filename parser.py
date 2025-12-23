@@ -30,6 +30,20 @@ def digit(b: int) -> Optional[str]:
     return chr(b) if 0x30 <= b <= 0x39 else None
 
 
+def parse_1digit(a: int) -> Optional[int]:
+    a = digit(a)
+    return int(a) if a is not None else None
+
+
+def parse_2digits(a: int, b: int) -> Optional[int]:
+    a, b = digit(a), digit(b)
+    if a is None and b is None:
+        return None
+    if a is None:
+        return int(b)
+    return int(a + b)
+
+
 def parse_clock(d1: int, d2: int, d3: int, d4: int) -> Optional[str]:
     """Parse 4-byte clock field into a human-readable string."""
     if d4 == 0x20:  # < 1 minute encoding: "SSt "
@@ -46,20 +60,6 @@ def parse_clock(d1: int, d2: int, d3: int, d4: int) -> Optional[str]:
     if a is None:
         a = ""
     return f"{a}{b}:{c}{d}"  # e.g. "06:04"
-
-
-def parse_2digits(a: int, b: int) -> Optional[int]:
-    a, b = digit(a), digit(b)
-    if a is None and b is None:
-        return None
-    if a is None:
-        return int(b)
-    return int(a + b)
-
-
-def parse_1digit(a: int) -> Optional[int]:
-    a = digit(a)
-    return int(a) if a is not None else None
 
 
 def parse_penalty(a: int, b: int, c: int) -> Optional[str]:
