@@ -58,29 +58,29 @@ function renderPenalties(container, active, clocks) {
   });
 }
 
-async function tick() {
+function applyState(s) {
+  if (!s?.ok) return;
+
+  clockEl.textContent = s.clock ?? '--:--';
+  homeEl.textContent = s.home?.score ?? '--';
+  awayEl.textContent = s.away?.score ?? '--';
+  periodEl.textContent = s.period ?? '-';
+
+  runDotEl.className = 'dot ' + (s.running ? 'on' : 'off');
+
+  renderTimeouts(homeTimeoutsEl, s.home?.timeouts);
+  renderTimeouts(awayTimeoutsEl, s.away?.timeouts);
+
+  renderPenalties(homePenaltiesEl, s.home?.penalties_active, s.home?.penalty_clocks);
+  renderPenalties(awayPenaltiesEl, s.away?.penalties_active, s.away?.penalty_clocks);
+}
+
+const source = new EventSource('/state/stream');
+source.onmessage = (event) => {
   try {
-    const r = await fetch('/state', { cache: 'no-store' });
-    const s = await r.json();
-    if (!s.ok) return;
-
-    clockEl.textContent = s.clock ?? '--:--';
-    homeEl.textContent = s.home?.score ?? '--';
-    awayEl.textContent = s.away?.score ?? '--';
-    periodEl.textContent = s.period ?? '-';
-
-    runDotEl.className = 'dot ' + (s.running ? 'on' : 'off');
-
-    renderTimeouts(homeTimeoutsEl, s.home?.timeouts);
-    renderTimeouts(awayTimeoutsEl, s.away?.timeouts);
-
-    renderPenalties(homePenaltiesEl, s.home?.penalties_active, s.home?.penalty_clocks);
-    renderPenalties(awayPenaltiesEl, s.away?.penalties_active, s.away?.penalty_clocks);
+    applyState(JSON.parse(event.data));
   } catch (e) {
     // Optional: uncomment for debugging
     // console.error(e);
   }
-}
-
-setInterval(tick, 100);
-tick();
+};

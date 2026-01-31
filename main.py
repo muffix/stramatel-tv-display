@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import argparse
 import logging
-from http.server import HTTPServer
+from http.server import ThreadingHTTPServer
 
 from serial.tools import list_ports
 
@@ -41,7 +41,7 @@ def main() -> None:
 
     start_source_thread(args.com, use_fake=args.fake_data)
 
-    with HTTPServer((args.http, args.port), Handler) as server:
+    with ThreadingHTTPServer((args.http, args.port), Handler) as server:
         logging.info(
             "Open http://%s:%s/ in a browser (fullscreen on your output)",
             args.http,

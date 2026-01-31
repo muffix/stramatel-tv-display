@@ -52,6 +52,16 @@ Add in vMix:
 3. Pick a suitable refresh rate, e.g. 100ms-500ms
 4. In Title Editor, map fields to the column names above (or use column order).
 
+## Live State (SSE)
+
+The server also exposes a server-sent events stream at:
+
+```
+http://<host>:8000/state/stream
+```
+
+Each event contains the same JSON payload as `/state`. This is what the web UI uses for real-time updates.
+
 ## RS-485 wiring (to USB-RS485)
 
 Stramatel’s TV interface cable (per *STRAMATEL codes.pdf*) breaks out 4 wires:

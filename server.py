@@ -53,6 +53,13 @@ class Handler(BaseHTTPRequestHandler):
     server_version = "StramatelHTTP/1.0"
     sys_version = ""
 
+    def handle(self) -> None:
+        try:
+            super().handle()
+        except (BrokenPipeError, ConnectionResetError) as exc:
+            logging.debug("Client %s disconnected: %s", self.client_address, exc)
+            return
+
     def do_GET(self) -> None:  # noqa: N802  (BaseHTTPRequestHandler API)
         if self.path == "/" or self.path.startswith("/index"):
             self._redirect("/static/index.html")
@@ -60,6 +67,9 @@ class Handler(BaseHTTPRequestHandler):
 
         if self.path == "/state":
             self._send_json()
+            return
+        if self.path == "/state/stream":
+            self._send_sse()
             return
 
         if self.path == "/vmix.json":
@@ -88,6 +98,23 @@ class Handler(BaseHTTPRequestHandler):
         self.send_header("Cache-Control", "no-store")
         self.end_headers()
         self.wfile.write(payload)
+
+    def _send_sse(self) -> None:
+        self.send_response(200)
+        self.send_header("Content-Type", "text/event-stream")
+        self.send_header("Cache-Control", "no-store")
+        self.send_header("Connection", "keep-alive")
+        self.end_headers()
+
+        while True:
+            with state_lock:
+                payload = json.dumps(latest_state)
+            try:
+                self.wfile.write(f"data: {payload}\n\n".encode("utf-8"))
+                self.wfile.flush()
+            except (BrokenPipeError, ConnectionResetError):
+                break
+            time.sleep(0.1)
 
     def _send_vmix(self) -> None:
         """Expose state in vMix-friendly JSON array-of-objects format."""
