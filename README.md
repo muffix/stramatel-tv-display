@@ -40,6 +40,16 @@ uv run python main.py --fake-data
 
 This replays `tests/data/stramatel_hockey_testdata_v3_raw_with_chatter.bin` on a loop.
 
+## Floorball Simulator (RS-485)
+
+A standalone simulator is available at `scripts/floorball_sim.py`. It emits valid 54-byte hockey/floorball frames over serial at 10 Hz and supports keyboard controls for scores, clock, period, and penalties (2:00/5:00).
+
+```bash
+uv run python scripts/floorball_sim.py --com COM3
+```
+
+Controls: Space start/stop, `q/a` home -/+, `w/s` away -/+, `e/r` home +2/+5, `d/f` away +2/+5, `t` reset clock, `1-3` set period, `Esc` quit.
+
 ## vMix Data Source
 
 The server exposes `http://<host>:8000/vmix.json`, returning a single-row JSON array with keys:
