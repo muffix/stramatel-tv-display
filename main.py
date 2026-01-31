@@ -22,7 +22,7 @@ def parse_args() -> argparse.Namespace:
         action="store_true",
         help="Ignore serial input and stream frames from bundled test data.",
     )
-    parser.add_argument("--http", default="127.0.0.1", help="HTTP bind address")
+    parser.add_argument("--http", default="0.0.0.0", help="HTTP bind address")
     parser.add_argument("--port", type=int, default=8000, help="HTTP port")
     return parser.parse_args()
 
