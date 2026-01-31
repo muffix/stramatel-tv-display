@@ -38,3 +38,4 @@ This project is a minimal Python app that reads Stramatel RS-485 hockey/floorbal
 - The parser currently focuses on hockey/floorball (`SPORT_HOCKEY` code).
 - State is protected by a global lock; `latest_state` starts as `{\"ok\": false}` until frames arrive.
 - `scripts/floorball_sim.py` simulates a floorball scoreboard over serial (10 Hz) with keyboard controls for clock, scores, period, and penalties.
+- `main.py --debug` enables debug logging and logs every received 54-byte frame (hex) from serial or fake data.

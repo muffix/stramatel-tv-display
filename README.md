@@ -30,6 +30,14 @@ uv run python main.py --com COM3
 
 Replace `COM3` with your serial device (e.g., `/dev/ttyUSB0` on Linux, `/dev/cu.usbserial123` on macOS). Open http://localhost:8000/ in a browser and fullscreen it on your display output.
 
+### Debug mode
+
+Enable debug logging and dump all received frames:
+
+```bash
+uv run python main.py --com COM3 --debug
+```
+
 ## Running (demo without hardware)
 
 Use bundled fixture data:

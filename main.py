@@ -23,6 +23,11 @@ def parse_args() -> argparse.Namespace:
         help="Ignore serial input and stream frames from bundled test data.",
     )
     parser.add_argument("--http", default="0.0.0.0", help="HTTP bind address")
+    parser.add_argument(
+        "--debug",
+        action="store_true",
+        help="Enable debug logging and dump all received frames.",
+    )
     parser.add_argument("--port", type=int, default=8000, help="HTTP port")
     return parser.parse_args()
 
@@ -31,7 +36,8 @@ def main() -> None:
     args = parse_args()
 
     logging.basicConfig(
-        level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s"
+        level=logging.DEBUG if args.debug else logging.INFO,
+        format="%(asctime)s %(levelname)s %(message)s",
     )
 
     if not args.com:
@@ -39,7 +45,7 @@ def main() -> None:
         for port in list_ports.comports():
             logging.info("  %s - %s", port.device, port.description)
 
-    start_source_thread(args.com, use_fake=args.fake_data)
+    start_source_thread(args.com, use_fake=args.fake_data, debug=args.debug)
 
     with ThreadingHTTPServer((args.http, args.port), Handler) as server:
         logging.info(

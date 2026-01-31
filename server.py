@@ -182,7 +182,7 @@ class Handler(BaseHTTPRequestHandler):
         self.wfile.write(data)
 
 
-def reader_thread(com_port: str) -> None:
+def reader_thread(com_port: str, debug: bool = False) -> None:
     """Continuously read frames from a serial port and update latest_state."""
     global latest_state
     with serial.Serial(
@@ -193,27 +193,27 @@ def reader_thread(com_port: str) -> None:
                 "ok": False,
                 "reason": f"connected to {com_port}, waiting for frames",
             }
-        _consume_stream(_serial_chunks(ser))
+        _consume_stream(_serial_chunks(ser), debug=debug)
 
 
-def dummy_data_thread() -> None:
+def dummy_data_thread(debug: bool = False) -> None:
     """Feed frames from the bundled fixture file to simulate the scoreboard."""
     data_file = DATA_DIR / "stramatel_hockey_testdata_v3_raw_with_chatter.bin"
-    _consume_stream(_file_chunks(data_file), frame_delay=0.5)
+    _consume_stream(_file_chunks(data_file), frame_delay=0.5, debug=debug)
 
 
 def start_source_thread(
-    com_port: Optional[str], use_fake: bool = False
+    com_port: Optional[str], use_fake: bool = False, debug: bool = False
 ) -> threading.Thread:
     """Start either a serial reader or dummy data feeder."""
     if use_fake or not com_port:
         if com_port and use_fake:
             logging.info("Ignoring --com because --fake-data was requested")
         logging.info("Using bundled dummy data")
-        target, args = dummy_data_thread, ()
+        target, args = dummy_data_thread, (debug,)
     else:
         logging.info("Starting serial reader on %s", com_port)
-        target, args = reader_thread, (com_port,)
+        target, args = reader_thread, (com_port, debug)
 
     thread = threading.Thread(target=target, args=args, daemon=True)
     thread.start()
@@ -225,7 +225,9 @@ def start_source_thread(
 # ---------------------------------------------------------------------------
 
 
-def _consume_stream(chunks: Iterator[bytes], frame_delay: float = 0.0) -> None:
+def _consume_stream(
+    chunks: Iterator[bytes], frame_delay: float = 0.0, debug: bool = False
+) -> None:
     """Common frame-consumption loop used by both real and fake sources."""
     global latest_state
     fs = FrameStream()
@@ -238,6 +240,8 @@ def _consume_stream(chunks: Iterator[bytes], frame_delay: float = 0.0) -> None:
             frame = fs.next_frame()
             if frame is None:
                 break
+            if debug:
+                logging.debug("frame=%s", frame.hex())
             if frame[1] == SPORT_HOCKEY:
                 parsed = parse_hockey(frame)
                 with state_lock:
